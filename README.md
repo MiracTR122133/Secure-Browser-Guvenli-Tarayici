@@ -22,10 +22,10 @@ gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir. Not: �
 ## 🧰 auto-py-to-exe ile EXE Oluşturma
 
 1. auto-py-to-exe indir:
- ***pip install auto-py-to-exe*** 
+(`pip install auto-py-to-exe`)
 
 2. Çalıştır:
- ***auto-py-to-exe***
+   (`auto-py-to-exe`)
    
 3. Ayarlar:
 - Script Location: `Secure_Browser.py`
@@ -69,8 +69,8 @@ Cloudflare / CAPTCHA is NOT bypassed
 No claim of complete anonymity or illegal tracking evasion
 The goal is to improve privacy, not to violate rules or services
 ## 🧰 Creating an EXE with auto-py-to-exe
-Install auto-py-to-exe: pip install auto-py-to-exe
-Run: auto-py-to-exe
+Install auto-py-to-exe: (`pip install auto-py-to-exe`)
+Run: (`auto-py-to-exe`)
 Configuration:
 Script Location: Secure_Browser.py
 Console Window: ❌ Disabled
