@@ -1,7 +1,7 @@
 # Secure Browser
 
 Secure Browser, Python ile geliştirilmiş,
-gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir.
+gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir. Not: İlk çalıştırırken yönetici olarak çalıştırırsanız pip otomatik kurulur ama yönetici olarak açmazsanız kütüphanelerin sizde olması gerekir. Kodda Python Kütüphaneleri BULUNMAKTADIR.
 
 ## 🚀 Özellikler
 - Dahili HTTP/HTTPS proxy (mitmproxy)
@@ -53,7 +53,7 @@ Menşei: Türkiye 🇹🇷
 ## --English--
 
 # Secure Browser
-Secure Browser is a privacy-focused, open-source desktop browser prototype developed with Python.
+Secure Browser is a privacy-focused, open-source desktop browser prototype developed with Python. Note: If you run pip as administrator the first time, it will be installed automatically, but if you don't run it as administrator, you will need to install the libraries manually. The code CONTAINS Python libraries.
 ## 🚀 Features
 Built-in HTTP/HTTPS proxy (mitmproxy)
 Ad and basic tracker blocking
