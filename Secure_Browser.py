@@ -4,6 +4,7 @@
 # License: MIT
 # Copyright (c) 2026 Mirac Gültepe
 # All Rights Reserved
+# Use Python 3.10+
 
 import os
 import sys
