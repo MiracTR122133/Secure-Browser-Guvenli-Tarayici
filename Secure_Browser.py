@@ -1,306 +1,261 @@
-# ==========================================
-# Secure Browser – Open Source Edition
-# Author: MiracTR
+# Secure_Browser.py
+# Open-source Secure Browser Prototype
+# Author: MiracTR (Türkiye)
 # License: MIT
 # Copyright (c) 2026 Mirac Gültepe
-# ==========================================
+# All Rights Reserved
 
-import sys, os, subprocess, threading, json, time
+import os
+import sys
+import json
+import uuid
+import time
+import threading
+import webbrowser
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import ttk, messagebox, simpledialog
 
-# ==========================================
-# AUTO PIP
-# ==========================================
-def ensure(pkg, imp=None):
-    try:
-        __import__(imp or pkg)
-    except Exception:
-        subprocess.call([sys.executable, "-m", "pip", "install", pkg])
+# =====================
+# OPTIONAL IMPORTS
+# =====================
+try:
+    import requests
+except ImportError:
+    requests = None
 
-ensure("pywebview", "webview")
-ensure("mitmproxy")
-ensure("requests")
+try:
+    from supabase import create_client
+except ImportError:
+    create_client = None
 
-import webview
-import requests
-from mitmproxy.tools.dump import DumpMaster
-from mitmproxy import options, http
-
-# ==========================================
-# SETTINGS
-# ==========================================
+# =====================
+# FILES
+# =====================
 SETTINGS_FILE = "settings.json"
+PROFILES_FILE = "profiles.json"
+DEVICE_FILE = "device.id"
+LOG_FILE = "browser.log"
 
+# =====================
+# DEFAULT SETTINGS
+# =====================
 DEFAULT_SETTINGS = {
-    "language": "tr",
-    "proxy_enabled": True,
-    "dark_mode": False,
-    "gamer_mode": False,
-    "use_virustotal": False,
-    "virustotal_key": "",
-    "use_chatgpt": False,
-    "openai_key": ""
+    "virustotal_enabled": False,
+    "virustotal_api_key": "",
+    "chatgpt_enabled": False,
+    "use_cloud": False,
+    "supabase_url": "",
+    "supabase_anon_key": "",
+    "dark_mode": True,
+    "fps_boost": False,
+    "low_ram_mode": False
 }
 
-def load_settings():
-    if os.path.exists(SETTINGS_FILE):
-        try:
-            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return DEFAULT_SETTINGS.copy()
-
-def save_settings():
-    with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
-        json.dump(settings, f, indent=2)
-
-settings = load_settings()
-
-# ==========================================
-# STARTUP WIZARD (NO HARDCODED KEYS)
-# ==========================================
-def startup_wizard():
-    root = tk.Tk()
-    root.withdraw()
-
-    if messagebox.askyesno(
-        "VirusTotal",
-        "Dosya indirmelerinde VirusTotal taraması açılsın mı?"
-    ):
-        key = simpledialog.askstring(
-            "VirusTotal API",
-            "VirusTotal API anahtarını gir:",
-            show="*"
-        )
-        if key:
-            settings["use_virustotal"] = True
-            settings["virustotal_key"] = key
-
-    if messagebox.askyesno(
-        "ChatGPT",
-        "ChatGPT entegrasyonu açılsın mı?"
-    ):
-        key = simpledialog.askstring(
-            "OpenAI API",
-            "OpenAI API anahtarını gir:",
-            show="*"
-        )
-        if key:
-            settings["use_chatgpt"] = True
-            settings["openai_key"] = key
-
-    save_settings()
-
-startup_wizard()
-
-# ==========================================
+# =====================
 # LOG SYSTEM
-# ==========================================
-logs = []
-
+# =====================
 def log(msg):
-    ts = time.strftime("%H:%M:%S")
-    logs.append(f"[{ts}] {msg}")
-    if len(logs) > 300:
-        logs.pop(0)
+    ts = time.strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{ts}] {msg}"
+    print(line)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(line + "\n")
 
-def get_logs():
-    return "\n".join(logs)
+# =====================
+# DEVICE ID
+# =====================
+def get_device_id():
+    if os.path.exists(DEVICE_FILE):
+        return open(DEVICE_FILE).read().strip()
+    did = str(uuid.uuid4())
+    open(DEVICE_FILE, "w").write(did)
+    return did
 
-# ==========================================
-# PROXY (LEGAL PRIVACY IMPROVEMENTS)
-# ==========================================
-BLOCKED_KEYWORDS = [
-    "doubleclick",
-    "googlesyndication",
-    "adsystem",
-    "analytics",
-    "tracker",
-    "facebook"
-]
+# =====================
+# SETTINGS
+# =====================
+def load_settings():
+    if not os.path.exists(SETTINGS_FILE):
+        save_settings(DEFAULT_SETTINGS)
+        return DEFAULT_SETTINGS.copy()
+    return json.load(open(SETTINGS_FILE, "r", encoding="utf-8"))
 
-proxy_enabled = settings["proxy_enabled"]
+def save_settings(data):
+    json.dump(data, open(SETTINGS_FILE, "w", encoding="utf-8"), indent=2)
 
-class PrivacyProxy:
-    def request(self, flow: http.HTTPFlow):
-        global proxy_enabled
-        if not proxy_enabled:
-            return
+# =====================
+# PROFILES (LOCAL)
+# =====================
+def load_profiles():
+    if not os.path.exists(PROFILES_FILE):
+        json.dump({}, open(PROFILES_FILE, "w"))
+    return json.load(open(PROFILES_FILE, "r", encoding="utf-8"))
 
-        host = flow.request.host.lower()
+def save_profiles(data):
+    json.dump(data, open(PROFILES_FILE, "w", encoding="utf-8"), indent=2)
 
-        if any(k in host for k in BLOCKED_KEYWORDS):
-            flow.response = http.Response.make(
-                403, b"Blocked by Secure Browser"
-            )
-            log(f"Blocked: {host}")
-            return
+# =====================
+# SUPABASE (OPTIONAL)
+# =====================
+def get_supabase_client(settings):
+    if not settings.get("use_cloud"):
+        return None
+    if not create_client:
+        log("Supabase library not installed")
+        return None
+    if not settings["supabase_url"] or not settings["supabase_anon_key"]:
+        return None
+    return create_client(settings["supabase_url"], settings["supabase_anon_key"])
 
-        flow.request.headers.pop("Cookie", None)
-        flow.request.headers["User-Agent"] = "Mozilla/5.0"
+def sync_profiles_cloud(settings, profiles):
+    sb = get_supabase_client(settings)
+    if not sb:
+        return profiles
 
-        if "cloudflare" in host:
-            log("Cloudflare algılandı (bypass yok)")
-
-def start_proxy():
-    opts = options.Options(
-        listen_host="127.0.0.1",
-        listen_port=8080
-    )
-    m = DumpMaster(
-        opts,
-        with_termlog=False,
-        with_dumper=False
-    )
-    m.addons.add(PrivacyProxy())
-    m.run()
-
-threading.Thread(
-    target=start_proxy,
-    daemon=True
-).start()
-
-os.environ["HTTP_PROXY"] = "http://127.0.0.1:8080"
-os.environ["HTTPS_PROXY"] = "http://127.0.0.1:8080"
-
-# ==========================================
-# OPTIONAL: VIRUSTOTAL
-# ==========================================
-def virustotal_scan(file_path):
-    if not settings["use_virustotal"]:
-        return "VirusTotal kapalı"
+    device_id = get_device_id()
 
     try:
-        headers = {"x-apikey": settings["virustotal_key"]}
-        with open(file_path, "rb") as f:
-            r = requests.post(
-                "https://www.virustotal.com/api/v3/files",
-                headers=headers,
-                files={"file": f}
-            )
-        return f"VT Status: {r.status_code}"
+        res = sb.table("profiles").select("data").eq("device_id", device_id).execute()
+        if res.data:
+            log("Profiles loaded from cloud")
+            save_profiles(res.data[0]["data"])
+            return res.data[0]["data"]
+        else:
+            sb.table("profiles").insert({
+                "device_id": device_id,
+                "data": profiles
+            }).execute()
+            log("Profiles uploaded to cloud")
     except Exception as e:
-        return f"VT Error: {e}"
+        log(f"Cloud sync error: {e}")
 
-# ==========================================
-# OPTIONAL: CHATGPT
-# ==========================================
-def chatgpt_request(prompt):
-    if not settings["use_chatgpt"]:
-        return "ChatGPT kapalı"
+    return profiles
+
+# =====================
+# VIRUSTOTAL (OPTIONAL)
+# =====================
+def virustotal_scan(url, api_key):
+    if not requests:
+        return "Requests module missing"
+
+    headers = {"x-apikey": api_key}
+    data = {"url": url}
 
     try:
-        import openai
-        openai.api_key = settings["openai_key"]
-        res = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+        r = requests.post(
+            "https://www.virustotal.com/api/v3/urls",
+            headers=headers,
+            data=data,
+            timeout=15
         )
-        return res.choices[0].message.content
+        return r.status_code
     except Exception as e:
-        return f"ChatGPT Error: {e}"
+        return str(e)
 
-# ==========================================
-# UI FUNCTIONS
-# ==========================================
-def toggle_proxy():
-    global proxy_enabled
-    proxy_enabled = not proxy_enabled
-    settings["proxy_enabled"] = proxy_enabled
-    save_settings()
-    log(f"Proxy {'Açık' if proxy_enabled else 'Kapalı'}")
+# =====================
+# MAIN UI
+# =====================
+class SecureBrowser(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Secure Browser")
+        self.geometry("1000x700")
 
-def toggle_dark():
-    settings["dark_mode"] = not settings["dark_mode"]
-    save_settings()
-    css = (
-        "html{filter:invert(1) hue-rotate(180deg)}"
-        if settings["dark_mode"] else ""
-    )
-    window.evaluate_js(
-        f"document.getElementById('dm')?.remove();"
-        f"document.head.insertAdjacentHTML("
-        f"'beforeend','<style id=dm>{css}</style>');"
-    )
+        self.settings = load_settings()
+        self.profiles = load_profiles()
+        self.profiles = sync_profiles_cloud(self.settings, self.profiles)
 
-def panic():
-    log("PANIC tetiklendi")
+        self.create_ui()
+        log("Browser started")
+
+    # -----------------
+    def create_ui(self):
+        self.style = ttk.Style()
+        if self.settings["dark_mode"]:
+            self.configure(bg="#1e1e1e")
+
+        top = ttk.Frame(self)
+        top.pack(fill="x")
+
+        ttk.Button(top, text="🌐 Open URL", command=self.open_url).pack(side="left")
+        ttk.Button(top, text="🛡 VT Scan", command=self.toggle_vt).pack(side="left")
+        ttk.Button(top, text="👤 Profile", command=self.profile_menu).pack(side="left")
+        ttk.Button(top, text="⚙ Advanced", command=self.advanced_menu).pack(side="left")
+        ttk.Button(top, text="💬 ChatGPT", command=self.chatgpt_ui).pack(side="left")
+        ttk.Button(top, text="💥 Panic", command=self.panic).pack(side="right")
+
+        self.logbox = tk.Text(self, height=12)
+        self.logbox.pack(fill="both", expand=True)
+        self.refresh_logs()
+
+    # -----------------
+    def refresh_logs(self):
+        if os.path.exists(LOG_FILE):
+            self.logbox.delete("1.0", "end")
+            self.logbox.insert("end", open(LOG_FILE).read())
+        self.after(2000, self.refresh_logs)
+
+    # -----------------
+    def open_url(self):
+        url = simpledialog.askstring("Open URL", "Enter URL:")
+        if not url:
+            return
+
+        if self.settings["virustotal_enabled"]:
+            res = virustotal_scan(url, self.settings["virustotal_api_key"])
+            messagebox.showinfo("VirusTotal", f"Scan result: {res}")
+
+        webbrowser.open(url)
+
+    # -----------------
+    def toggle_vt(self):
+        self.settings["virustotal_enabled"] = not self.settings["virustotal_enabled"]
+        save_settings(self.settings)
+        messagebox.showinfo(
+            "VirusTotal",
+            f"VirusTotal {'enabled' if self.settings['virustotal_enabled'] else 'disabled'}"
+        )
+
+    # -----------------
+    def profile_menu(self):
+        name = simpledialog.askstring("Profile", "Profile name:")
+        if not name:
+            return
+        self.profiles[name] = {"created": time.time()}
+        save_profiles(self.profiles)
+        messagebox.showinfo("Profile", f"Profile '{name}' saved")
+
+    # -----------------
+    def advanced_menu(self):
+        win = tk.Toplevel(self)
+        win.title("Advanced")
+
+        def toggle(key):
+            self.settings[key] = not self.settings[key]
+            save_settings(self.settings)
+
+        ttk.Checkbutton(win, text="FPS Boost", command=lambda: toggle("fps_boost")).pack(anchor="w")
+        ttk.Checkbutton(win, text="Low RAM Mode", command=lambda: toggle("low_ram_mode")).pack(anchor="w")
+        ttk.Checkbutton(win, text="Cloud Sync (Supabase)", command=lambda: toggle("use_cloud")).pack(anchor="w")
+
+    # -----------------
+    def chatgpt_ui(self):
+        if not self.settings["chatgpt_enabled"]:
+            messagebox.showwarning("ChatGPT", "ChatGPT integration is disabled")
+            return
+        messagebox.showinfo("ChatGPT", "Chat window placeholder")
+
+    # -----------------
+    def panic(self):
+        webbrowser.open("https://www.google.com")
+        self.destroy()
+
+# =====================
+# RUN
+# =====================
+if __name__ == "__main__":
     try:
-        subprocess.Popen("start chrome", shell=True)
-    except Exception:
-        pass
-    os._exit(0)
-
-def show_logs():
-    return get_logs()
-
-# ==========================================
-# WINDOW
-# ==========================================
-SEARCH_URL = "https://duckduckgo.com"
-
-window = webview.create_window(
-    "Secure Browser",
-    SEARCH_URL,
-    width=1200,
-    height=750,
-    private_mode=True
-)
-
-def on_load():
-    window.expose(
-        toggle_proxy,
-        toggle_dark,
-        panic,
-        show_logs
-    )
-
-    window.evaluate_js("""
-    const panel = document.createElement('div');
-    panel.innerHTML = `
-    <style>
-      #sb-panel{
-        position:fixed;
-        top:10px;
-        right:10px;
-        z-index:99999;
-        background:#111;
-        color:#fff;
-        padding:10px;
-        border-radius:12px;
-        display:flex;
-        gap:6px
-      }
-      #sb-panel button{
-        border:none;
-        border-radius:6px;
-        padding:6px 8px;
-        cursor:pointer;
-        background:#222;
-        color:white
-      }
-      #sb-panel button:hover::after{
-        content:attr(data-tip);
-        position:absolute;
-        top:42px;
-        background:black;
-        color:white;
-        padding:4px 6px;
-        border-radius:6px;
-        font-size:12px;
-        white-space:nowrap
-      }
-    </style>
-    <div id="sb-panel">
-      <button data-tip="Proxy Aç/Kapat" onclick="toggle_proxy()">🛡</button>
-      <button data-tip="Dark Mode" onclick="toggle_dark()">🌙</button>
-      <button data-tip="Loglar / Hatalar" onclick="alert(show_logs())">📜</button>
-      <button data-tip="PANIC" style="background:red" onclick="panic()">PANIC</button>
-    </div>
-    `;
-    document.body.appendChild(panel);
-    """)
-
-webview.start(on_load)
+        app = SecureBrowser()
+        app.mainloop()
+    except Exception as e:
+        log(f"Fatal error: {e}")
