@@ -2,6 +2,7 @@
 # Secure Browser – Open Source Edition
 # Author: MiracTR
 # License: MIT
+# Copyright (c) 2026 Mirac Gültepe
 # ==========================================
 
 import sys, os, subprocess, threading, json, time
