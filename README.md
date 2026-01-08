@@ -1,7 +1,11 @@
 # Secure Browser
 
 Secure Browser, Python ile geliştirilmiş,
-gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir. Not: İlk çalıştırırken yönetici olarak çalıştırırsanız pip otomatik kurulur ama yönetici olarak açmazsanız kütüphanelerin sizde olması gerekir. Kodda Python Kütüphaneleri BULUNMAKTADIR.
+gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir.
+
+**Not:** İlk çalıştırırken yönetici olarak çalıştırırsanız `pip` otomatik kurulur.  
+Yönetici olarak açmazsanız gerekli kütüphanelerin sisteminizde yüklü olması gerekir.  
+Kodun içinde **Python kütüphaneleri ile ilgili kontroller bulunmaktadır.**
 
 ## 🚀 Özellikler
 - Dahili HTTP/HTTPS proxy (mitmproxy)
@@ -22,11 +26,10 @@ gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir. Not: �
 ## 🧰 auto-py-to-exe ile EXE Oluşturma
 
 1. auto-py-to-exe indir:
-(`pip install auto-py-to-exe`)
-
+pip install auto-py-to-exe
 2. Çalıştır:
-   (`auto-py-to-exe`)
-   
+auto-py-to-exe
+
 3. Ayarlar:
 - Script Location: `Secure_Browser.py`
 - Console Window: ❌ Disabled
@@ -47,43 +50,61 @@ MIT License
 
 ---
 
-Bu proje ~MiracTR adlı kullanıcı tarafından yapıldı.  
-Menşei: Türkiye 🇹🇷
+Bu proje **~MiracTR** adlı kullanıcı tarafından yapıldı.  
+Menşei: **Türkiye 🇹🇷**
 
-## --English--
+---
+
+## -- English --
 
 # Secure Browser
-Secure Browser is a privacy-focused, open-source desktop browser prototype developed with Python. Note: If you run pip as administrator the first time, it will be installed automatically, but if you don't run it as administrator, you will need to install the libraries manually. The code CONTAINS Python libraries.
+
+Secure Browser is a privacy-focused, open-source desktop browser prototype developed with Python.
+
+**Note:** If you run the application as administrator on first launch, `pip` will be installed automatically.  
+If you do not run it as administrator, required libraries must already be installed on your system.  
+The code **contains Python library checks.**
+
 ## 🚀 Features
-Built-in HTTP/HTTPS proxy (mitmproxy)
-Ad and basic tracker blocking
-Dark Mode
-Panic button (instant exit + launch Google Chrome)
-Error and log viewer
-Optional VirusTotal integration
-Optional ChatGPT integration
-Local settings storage (settings.json)
-Single-file architecture
+- Built-in HTTP/HTTPS proxy (mitmproxy)
+- Ad and basic tracker blocking
+- Dark Mode
+- Panic button (instant exit + launch Google Chrome)
+- Error and log viewer
+- Optional VirusTotal integration
+- Optional ChatGPT integration
+- Local settings storage (`settings.json`)
+- Single-file architecture
+
 ## ⚠️ Important Notes
-Cloudflare / CAPTCHA is NOT bypassed
-No claim of complete anonymity or illegal tracking evasion
-The goal is to improve privacy, not to violate rules or services
+- Cloudflare / CAPTCHA is **NOT bypassed**
+- No claim of complete anonymity or illegal tracking evasion
+- The goal is to improve privacy, not to violate rules or services
+
 ## 🧰 Creating an EXE with auto-py-to-exe
-Install auto-py-to-exe: (`pip install auto-py-to-exe`)
-Run: (`auto-py-to-exe`)
+
+1. Install auto-py-to-exe:
+pip install auto-py-to-exe
+2. Run:
+auto-py-to-exe
+
 Configuration:
-Script Location: Secure_Browser.py
-Console Window: ❌ Disabled
-Onefile: ❌ (optional)
-Icon: your custom .ico file
-Additional Files: settings.json (optional)
-Click Convert
+- Script Location: `Secure_Browser.py`
+- Console Window: ❌ Disabled
+- Onefile: ❌ (optional)
+- Icon: your custom `.ico` file
+- Additional Files: `settings.json` (optional)
+
+Click **Convert**
+
 ## ⚖️ Legal Disclaimer
 This software:
-Is intended for educational and personal use only
-Users are responsible for complying with local laws and service terms
-The developer is not responsible for misuse
+- Is intended for educational and personal use only
+- Users are responsible for complying with local laws and service terms
+- The developer is not responsible for misuse
+
 ## 📌 License
 MIT License
-This project was created by the user ***~MiracTR.***
-Country of origin: Türkiye
+
+This project was created by **~MiracTR**  
+Country of origin: **Türkiye 🇹🇷**
