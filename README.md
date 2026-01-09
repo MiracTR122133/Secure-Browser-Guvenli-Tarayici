@@ -2,139 +2,131 @@
 
 Secure Browser, Python ile geliştirilmiş, gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir.
 
+**Not:** İlk çalıştırmada uygulamayı **yönetici olarak** açarsanız gerekli Python kütüphaneleri otomatik olarak `pip` ile kurulabilir.  
+Yönetici olarak çalıştırılmazsa, kütüphanelerin sistemde önceden yüklü olması gerekir.  
+Kod, gerekli Python kütüphanelerini **içermektedir**.
+
+---
+
 ## 🚀 Özellikler
 - Dahili HTTP/HTTPS proxy (mitmproxy)
 - Reklam ve temel takip engelleme
 - Dark Mode
-- Panic butonu (anında kapatma + Chrome açma)
+- Panic butonu (anında kapatma + Google Chrome açma)
 - Hata / log görüntüleme
 - Opsiyonel VirusTotal entegrasyonu
 - Opsiyonel ChatGPT entegrasyonu
-- **Opsiyonel Premium Lisans Sistemi (CSV + Kriptografik Doğrulama)**
+- **Opsiyonel Premium Lisans Sistemi (Kriptografik imza + CSV)**
 - Ayarların yerel olarak saklanması (`settings.json`)
 - Tek dosya mimarisi
 
-## 🔐 Premium Lisans Sistemi (CSV)
-Premium sistem **zorunlu değildir**. Uygulama lisanssız da çalışır.
-
-**Mantık:**
-- Lisanslar **CSV dosyası** olarak dağıtılır.
-- CSV içeriği **şifreli + imzalı** bir `license_blob` içerir.
-- Uygulama yalnızca **public key** ile doğrulama yapar.
-- Sahte veya değiştirilmiş CSV **çalışmaz**.
-
-**Premium ile açılabilecek örnek özellikler:**
-- Turbo Mode (performans optimizasyonları)
-- Advanced Privacy ayarları
-- Bulut profil senkronizasyonu (opsiyonel)
-
-## 📦 Lisans Yükleme Akışı
-1. Uygulamada **Premium → Lisans Yükle** seçilir
-2. Kullanıcı CSV dosyasını seçer
-3. Uygulama:
-   - İmzayı doğrular
-   - Tarihi kontrol eder
-   - (Opsiyonel) cihaz eşleşmesini kontrol eder
-4. Geçerliyse premium aktif olur
+---
 
 ## 🧰 auto-py-to-exe ile EXE Oluşturma
-1. Kurulum:
-   `pip install auto-py-to-exe`
-2. Çalıştır:
-   `auto-py-to-exe`
-3. Ayarlar:
-   - Script Location: `Secure_Browser.py`
-   - Console Window: Disabled
-   - Onefile: İsteğe bağlı
-   - Icon: kendi `.ico` dosyan
-   - Additional Files: `settings.json` (opsiyonel)
-4. Convert
+
+### Kurulum (Install)
+pip install auto-py-to-exe
+### Çalıştırma (Run)
+auto-py-to-exe
+
+### Ayarlar (Configuration)
+- Script Location: `Secure_Browser.py`
+- Console Window: ❌ Disabled
+- Onefile: ❌ (isteğe bağlı)
+- Icon: kendi `.ico` dosyan
+- Additional Files: `settings.json` (opsiyonel)
+
+### Derleme
+- **Convert** butonuna bas
+
+---
 
 ## ⚠️ Önemli Notlar
 - Cloudflare / CAPTCHA **bypass edilmez**
-- Amaç gizliliği artırmaktır
-- Yasadışı kullanım amaçlanmaz
+- Tam anonimlik veya yasadışı iz gizleme iddiası yoktur
+- Amaç gizliliği **artırmak**, ihlal etmek değildir
+
+---
 
 ## ⚖️ Yasal Açıklama
-Bu yazılım eğitim ve kişisel kullanım içindir.
-Kullanıcı yerel yasalardan sorumludur.
+Bu yazılım:
+- Eğitim ve kişisel kullanım amaçlıdır
+- Kullanıcı, yerel yasalar ve hizmet şartlarından kendisi sorumludur
+- Geliştirici, kötüye kullanımdan sorumlu tutulamaz
+
+---
 
 ## 📌 Lisans
 MIT License
 
 ---
-Bu proje ~MiracTR adlı kullanıcı tarafından yapıldı.  
+
+Bu proje **~MiracTR** adlı kullanıcı tarafından yapılmıştır.  
 Menşei: Türkiye 🇹🇷
 
-## ---------------------
+---
+
+# -- English --
 
 # Secure Browser
 
-Secure Browser is a **privacy-focused, open-source desktop browser prototype** developed in Python.
+Secure Browser is a privacy-focused, open-source desktop browser prototype developed with Python.
+
+**Note:** If you run the application as **administrator** on first launch, required Python libraries can be installed automatically using `pip`.  
+Otherwise, dependencies must already be installed.
+
+---
 
 ## 🚀 Features
 - Built-in HTTP/HTTPS proxy (mitmproxy)
 - Ad and basic tracker blocking
 - Dark Mode
-- Panic button (instant close + launch Chrome)
-- Error / log monitoring
+- Panic button (instant exit + launch Google Chrome)
+- Error / log viewer
 - Optional VirusTotal integration
 - Optional ChatGPT integration
-- **Optional Premium License System (CSV + Cryptographic Verification)**
+- Optional Premium License System (cryptographic verification)
 - Local settings storage (`settings.json`)
 - Single-file architecture
 
-## 🔐 Premium License System (CSV)
-The premium system is **optional**.  
-The application works fully without a license.
-
-### Concept
-- Licenses are distributed as **CSV files**
-- The CSV contains an **encrypted and signed** `license_blob`
-- The application verifies licenses using a **public key only**
-- Fake or modified CSV files **will not work**
-
-### Example Premium Features
-- Turbo Mode (performance optimizations)
-- Advanced privacy controls
-- Cloud profile synchronization (optional)
-
-## 📦 License Activation Flow
-1. In the application, select **Premium → Load License**
-2. The user selects a CSV file
-3. The application:
-   - Verifies the digital signature
-   - Checks the expiration date
-   - (Optional) Verifies device binding
-4. If valid, premium features are enabled
+---
 
 ## 🧰 Creating an EXE with auto-py-to-exe
-1. Install:
-   `pip install auto-py-to-exe`
-2. Run:
-   `auto-py-to-exe`
-3. Configuration:
-   - Script Location: `Secure_Browser.py`
-   - Console Window: Disabled
-   - Onefile: Optional
-   - Icon: your custom `.ico` file
-   - Additional Files: `settings.json` (optional)
-4. Convert
+
+### Install
+pip install auto-py-to-exe
+### Run
+auto-py-to-exe
+
+### Configuration
+- Script Location: `Secure_Browser.py`
+- Console Window: Disabled
+- Onefile: Optional
+- Icon: your custom `.ico` file
+- Additional Files: `settings.json` (optional)
+
+### Build
+- Click **Convert**
+
+---
 
 ## ⚠️ Important Notes
-- Cloudflare / CAPTCHA **is not bypassed**
-- The goal is to improve user privacy
-- No illegal usage is intended
+- Cloudflare / CAPTCHA is NOT bypassed
+- No claim of full anonymity or illegal tracking evasion
+- The goal is to improve privacy, not violate rules
+
+---
 
 ## ⚖️ Legal Disclaimer
-This software is intended for educational and personal use only.  
-Users are responsible for complying with local laws.
+This software is intended for **educational and personal use only**.  
+Users are responsible for complying with local laws and service terms.
+
+---
 
 ## 📌 License
 MIT License
 
 ---
 
-This project was created by the user **~MiracTR**.  
-Origin: Türkiye 🇹🇷
-
+This project was created by **~MiracTR**  
+Country of origin: Türkiye 🇹🇷
