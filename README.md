@@ -1,33 +1,48 @@
 # Secure Browser
 
-Secure Browser, Python ile geliştirilmiş, gizlilik odaklı ve açık kaynak bir masaüstü tarayıcı prototipidir.
+Secure Browser, Python ile geliştirilmiş, gizlilik ve bütünlük odaklı, açık kaynak bir masaüstü tarayıcı prototipidir.  
+Proje, kullanıcı trafiğini yerel olarak denetlemeyi ve temel gizlilik ihlallerini azaltmayı amaçlar.
 
 **Not:** İlk çalıştırmada uygulamayı **yönetici olarak** açarsanız gerekli Python kütüphaneleri otomatik olarak `pip` ile kurulabilir.  
-Yönetici olarak çalıştırılmazsa, kütüphanelerin sistemde önceden yüklü olması gerekir.  
-Kod, gerekli Python kütüphanelerini **içermektedir**.
+Yönetici olarak çalıştırılmazsa, kütüphanelerin sistemde önceden yüklü olması gerekir.
 
 ---
 
 ## 🚀 Özellikler
-- Dahili HTTP/HTTPS proxy (mitmproxy)
-- Reklam ve temel takip engelleme
+- Dahili HTTP/HTTPS proxy (**mitmproxy**, zorunlu ve kapatılamaz)
+- Reklam ve temel takip alan adı engelleme
+- Çerez (Cookie) temizleme
+- Sabit User-Agent kullanımı
 - Dark Mode
-- Panic butonu (anında kapatma + Google Chrome açma)
-- Hata / log görüntüleme
-- Opsiyonel VirusTotal entegrasyonu
-- Opsiyonel ChatGPT entegrasyonu
-- **Opsiyonel Premium Lisans Sistemi (Kriptografik imza + CSV)**
+- Panic butonu (**anında uygulama kapatma**)
+- Dahili log sistemi (salt okunur)
+- **Kriptografik Premium Lisans Sistemi (Ed25519 + CSV)**
 - Ayarların yerel olarak saklanması (`settings.json`)
 - Tek dosya mimarisi
+
+---
+
+## 🔐 Güvenlik Tasarımı
+- Proxy kullanıcı tarafından **devre dışı bırakılamaz**
+- Web içeriklerinin Python API çağırması **yetkilendirme token’ı ile korunur**
+- JS → Python yetkisiz erişim engellenmiştir
+- Harici tarayıcı açma / kaçış davranışı yoktur
+- Lisans doğrulama yalnızca **public key** ile yapılır
+- Lisans süresi ve imza bütünlüğü kontrol edilir
 
 ---
 
 ## 🧰 auto-py-to-exe ile EXE Oluşturma
 
 ### Kurulum (Install)
+```bash
 pip install auto-py-to-exe
+```
+
 ### Çalıştırma (Run)
+```bash
 auto-py-to-exe
+```
 
 ### Ayarlar (Configuration)
 - Script Location: `Secure_Browser.py`
@@ -43,8 +58,9 @@ auto-py-to-exe
 
 ## ⚠️ Önemli Notlar
 - Cloudflare / CAPTCHA **bypass edilmez**
-- Tam anonimlik veya yasadışı iz gizleme iddiası yoktur
-- Amaç gizliliği **artırmak**, ihlal etmek değildir
+- VPN, DNS veya sistem seviyesi anonimlik sağlamaz
+- Amaç **tam anonimlik değil**, gizliliği artırmaktır
+- Bu yazılım bir “tam sınav tarayıcısı” değildir
 
 ---
 
@@ -61,7 +77,7 @@ MIT License
 
 ---
 
-Bu proje **~MiracTR** adlı kullanıcı tarafından yapılmıştır.  
+Bu proje **~MiracTR** tarafından geliştirilmiştir.  
 Menşei: Türkiye 🇹🇷
 
 ---
@@ -70,33 +86,49 @@ Menşei: Türkiye 🇹🇷
 
 # Secure Browser
 
-Secure Browser is a privacy-focused, open-source desktop browser prototype developed with Python.
+Secure Browser is an open-source, privacy- and integrity-focused desktop browser prototype developed in Python.  
+It is designed to locally control web traffic and reduce common privacy risks.
 
-**Note:** If you run the application as **administrator** on first launch, required Python libraries can be installed automatically using `pip`.  
+**Note:** If the application is run as **administrator** on first launch, required Python libraries can be installed automatically via `pip`.  
 Otherwise, dependencies must already be installed.
 
 ---
 
 ## 🚀 Features
-- Built-in HTTP/HTTPS proxy (mitmproxy)
-- Ad and basic tracker blocking
+- Built-in HTTP/HTTPS proxy (**mitmproxy**, mandatory and non-disableable)
+- Ad and basic tracker domain blocking
+- Cookie stripping
+- Fixed User-Agent
 - Dark Mode
-- Panic button (instant exit + launch Google Chrome)
-- Error / log viewer
-- Optional VirusTotal integration
-- Optional ChatGPT integration
-- Optional Premium License System (cryptographic verification)
+- Panic button (**instant application exit**)
+- Internal log system (read-only)
+- **Cryptographic Premium License System (Ed25519 + CSV)**
 - Local settings storage (`settings.json`)
 - Single-file architecture
+
+---
+
+## 🔐 Security Design
+- Proxy cannot be disabled by the user
+- Web content → Python API calls are protected by an authorization token
+- Unauthorized JS → Python access is blocked
+- No external browser launch or escape behavior
+- License verification uses **public-key cryptography only**
+- License expiration and signature integrity are enforced
 
 ---
 
 ## 🧰 Creating an EXE with auto-py-to-exe
 
 ### Install
+```bash
 pip install auto-py-to-exe
+```
+
 ### Run
+```bash
 auto-py-to-exe
+```
 
 ### Configuration
 - Script Location: `Secure_Browser.py`
@@ -112,14 +144,15 @@ auto-py-to-exe
 
 ## ⚠️ Important Notes
 - Cloudflare / CAPTCHA is NOT bypassed
-- No claim of full anonymity or illegal tracking evasion
-- The goal is to improve privacy, not violate rules
+- Does not provide VPN, DNS, or OS-level anonymity
+- The goal is privacy improvement, not rule circumvention
+- This is not a full lockdown exam browser
 
 ---
 
 ## ⚖️ Legal Disclaimer
 This software is intended for **educational and personal use only**.  
-Users are responsible for complying with local laws and service terms.
+Users are responsible for compliance with local laws and service terms.
 
 ---
 
@@ -128,5 +161,5 @@ MIT License
 
 ---
 
-This project was created by **~MiracTR**  
+This project was developed by **~MiracTR**  
 Country of origin: Türkiye 🇹🇷
