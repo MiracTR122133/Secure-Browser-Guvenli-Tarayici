@@ -1,24 +1,8 @@
 # ============================================================
-# Secure Browser
-#
-# Author: Mirac Gültepe
-# License: MIT
-# Copyright (c) 2026 Mirac Gültepe
-# All rights reserved.
-#
-# Menşei/Country of origin: Türkiye
+# Secure Browser (Security Hardened)
 # ============================================================
 
-import os
-import sys
-import json
-import csv
-import base64
-import hashlib
-import datetime
-import subprocess
-import threading
-import time
+import os, sys, json, csv, base64, datetime, subprocess, threading, secrets
 
 # =======================
 # AUTO PIP
@@ -26,7 +10,7 @@ import time
 def ensure(pkg, imp=None):
     try:
         __import__(imp or pkg)
-    except Exception:
+    except:
         subprocess.call([sys.executable, "-m", "pip", "install", pkg])
 
 ensure("pywebview", "webview")
@@ -43,7 +27,6 @@ from cryptography.exceptions import InvalidSignature
 # CONSTANTS
 # =======================
 SETTINGS_FILE = "settings.json"
-
 PUBLIC_KEY_BASE64 = "zbUL0WrFbdNsRrDY0yerwLLG6D/vnX/LCyhE9PTeelw="
 
 SEARCH_ENGINES = {
@@ -53,7 +36,7 @@ SEARCH_ENGINES = {
 }
 
 # =======================
-# GLOBAL STATE
+# STATE
 # =======================
 state = {
     "proxy": True,
@@ -64,6 +47,7 @@ state = {
 }
 
 logs = []
+API_TOKEN = secrets.token_hex(32)  # 🔒 JS ↔ Python auth
 
 # =======================
 # SETTINGS
@@ -92,13 +76,12 @@ def log(msg):
     print(entry)
 
 # =======================
-# PREMIUM LICENSE VERIFY
+# LICENSE VERIFY
 # =======================
 def verify_license(csv_path):
     try:
         with open(csv_path, newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            row = next(reader)
+            row = next(csv.DictReader(f))
 
         payload = f"{row['license_id']}|{row['expires_at']}"
         signature = base64.b64decode(row["signature"])
@@ -109,8 +92,7 @@ def verify_license(csv_path):
 
         pub.verify(signature, payload.encode())
 
-        exp = datetime.datetime.fromisoformat(row["expires_at"])
-        if exp < datetime.datetime.utcnow():
+        if datetime.datetime.fromisoformat(row["expires_at"]) < datetime.datetime.utcnow():
             log("License expired")
             return False
 
@@ -125,15 +107,12 @@ def verify_license(csv_path):
         return False
 
 # =======================
-# PROXY
+# PROXY (LOCKED)
 # =======================
 BLOCKED = ["ads", "analytics", "doubleclick", "facebook"]
 
 class SecureProxy:
     def request(self, flow: http.HTTPFlow):
-        if not state["proxy"]:
-            return
-
         host = flow.request.host.lower()
         if any(b in host for b in BLOCKED):
             flow.response = http.Response.make(403, b"Blocked")
@@ -155,13 +134,13 @@ os.environ["HTTP_PROXY"] = "http://127.0.0.1:8080"
 os.environ["HTTPS_PROXY"] = "http://127.0.0.1:8080"
 
 # =======================
-# UI ACTIONS
+# SECURE UI API
 # =======================
-def toggle_proxy():
-    state["proxy"] = not state["proxy"]
-    save_settings()
+def auth(token):
+    return token == API_TOKEN
 
-def toggle_dark():
+def toggle_dark(token):
+    if not auth(token): return
     state["dark"] = not state["dark"]
     css = "html{filter:invert(1) hue-rotate(180deg)}" if state["dark"] else ""
     window.evaluate_js(
@@ -170,36 +149,29 @@ def toggle_dark():
     )
     save_settings()
 
-def toggle_silent():
-    state["silent"] = not state["silent"]
-    save_settings()
-
-def change_engine(name):
+def change_engine(token, name):
+    if not auth(token): return
     state["engine"] = name
     save_settings()
     window.load_url(SEARCH_ENGINES[name])
 
-def panic():
-    try:
-        subprocess.Popen("start chrome", shell=True)
-    except:
-        pass
+def panic(token):
+    if not auth(token): return
     window.destroy()
     os._exit(0)
 
-def load_license():
+def load_license(token):
+    if not auth(token): return
     path = window.create_file_dialog(webview.OPEN_DIALOG)
-    if path:
-        if verify_license(path[0]):
-            state["premium"] = True
-            save_settings()
-            window.evaluate_js("alert('Premium Activated')")
-        else:
-            window.evaluate_js("alert('Invalid License')")
+    if path and verify_license(path[0]):
+        state["premium"] = True
+        save_settings()
+        window.evaluate_js("alert('Premium Activated')")
 
-def show_logs():
-    text = "\\n".join(logs[-200:])
-    window.evaluate_js(f"alert(`{text}`)")
+def show_logs(token):
+    if not auth(token): return
+    safe = "\\n".join(logs[-100:]).replace("`", "'")
+    window.evaluate_js(f"alert(`{safe}`)")
 
 # =======================
 # WINDOW
@@ -214,38 +186,36 @@ window = webview.create_window(
 
 def on_load():
     window.expose(
-        toggle_proxy,
         toggle_dark,
-        toggle_silent,
         change_engine,
         panic,
         load_license,
         show_logs
     )
 
-    window.evaluate_js("""
+    window.evaluate_js(f"""
+    const TOKEN = "{API_TOKEN}";
+
     document.addEventListener('keydown', e=>{
-        if(e.ctrlKey && e.shiftKey && e.key==='X'){ panic(); }
+        if(e.ctrlKey && e.shiftKey && e.key==='X') panic(TOKEN);
     });
 
     document.head.insertAdjacentHTML('beforeend',`
     <style>
-    #ui{position:fixed;top:10px;right:10px;z-index:9999;
-    display:flex;gap:6px;background:#000a;padding:8px;border-radius:10px}
-    button,select{border:none;border-radius:6px;padding:4px 8px}
+    #ui{{position:fixed;top:10px;right:10px;z-index:9999;
+    display:flex;gap:6px;background:#000a;padding:8px;border-radius:10px}}
+    button,select{{border:none;border-radius:6px;padding:4px 8px}}
     </style>
     <div id=ui>
-      <select onchange="change_engine(this.value)">
+      <select onchange="change_engine(TOKEN,this.value)">
         <option>DuckDuckGo</option>
         <option>Google</option>
         <option>Startpage</option>
       </select>
-      <button onclick="toggle_dark()">🌙</button>
-      <button onclick="toggle_silent()">🔇</button>
-      <button onclick="toggle_proxy()">🛡</button>
-      <button onclick="load_license()">⭐ Premium</button>
-      <button onclick="show_logs()">📜 Logs</button>
-      <button onclick="panic()" style="background:red;color:white">PANIC</button>
+      <button onclick="toggle_dark(TOKEN)">🌙</button>
+      <button onclick="load_license(TOKEN)">⭐</button>
+      <button onclick="show_logs(TOKEN)">📜</button>
+      <button onclick="panic(TOKEN)" style="background:red;color:white">PANIC</button>
     </div>
     `);
     """)
