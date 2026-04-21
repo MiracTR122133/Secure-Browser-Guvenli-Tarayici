@@ -164,8 +164,8 @@ MIT License
 This project was developed by **~MiracTR**  
 Country of origin: Türkiye 🇹🇷
 
-Source Code to copy-paste/kopyala yapıştır yapmak için kaynak kodu:
-´´´bash
+Copy Paste Code/ Kodu Kopyala Yapıştır:
+```bash
 # ============================================================
 # Secure Browser (Security Hardened - Premium Removed)
 # ============================================================
@@ -357,4 +357,4 @@ def on_load():
     """)
 
 webview.start(on_load)
-´´´
+```
