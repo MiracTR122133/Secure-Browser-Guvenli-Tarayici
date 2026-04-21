@@ -164,7 +164,10 @@ MIT License
 This project was developed by **~MiracTR**  
 Country of origin: Türkiye 🇹🇷
 
-Copy Paste Code/ Kodu Kopyala Yapıştır:
+---
+
+## Copy Paste Code/ Kodu Kopyala Yapıştır:
+
 ```bash
 # ============================================================
 # Secure Browser (Security Hardened - Premium Removed)
