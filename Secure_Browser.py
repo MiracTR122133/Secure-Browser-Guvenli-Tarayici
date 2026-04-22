@@ -1,5 +1,5 @@
 # ============================================================
-# Secure Browser (Security Hardened - Premium Removed)
+# Secure Browser (Clean Fixed Version)
 # ============================================================
 
 import os, sys, json, datetime, subprocess, threading, secrets
@@ -42,7 +42,7 @@ state = {
 }
 
 logs = []
-API_TOKEN = secrets.token_hex(32)  # 🔒 JS ↔ Python auth
+API_TOKEN = secrets.token_hex(32)
 
 # =======================
 # SETTINGS
@@ -71,7 +71,7 @@ def log(msg):
     print(entry)
 
 # =======================
-# PROXY (LOCKED)
+# PROXY
 # =======================
 BLOCKED = ["ads", "analytics", "doubleclick", "facebook"]
 
@@ -84,7 +84,6 @@ class SecureProxy:
             log(f"Blocked: {host}")
             return
 
-        # Remove tracking headers
         flow.request.headers.pop("Cookie", None)
         flow.request.headers["User-Agent"] = "Mozilla/5.0 SecureBrowser"
 
@@ -100,28 +99,28 @@ os.environ["HTTP_PROXY"] = "http://127.0.0.1:8080"
 os.environ["HTTPS_PROXY"] = "http://127.0.0.1:8080"
 
 # =======================
-# SECURE UI API
+# SECURITY API
 # =======================
 def auth(token):
     return token == API_TOKEN
 
 def toggle_dark(token):
-    if not auth(token): 
+    if not auth(token):
         return
 
     state["dark"] = not state["dark"]
 
     css = "html{filter:invert(1) hue-rotate(180deg)}" if state["dark"] else ""
 
-    window.evaluate_js(
-        f"document.getElementById('dm')?.remove();"
-        f"document.head.insertAdjacentHTML('beforeend','<style id=dm>{css}</style>');"
-    )
+    window.evaluate_js(f"""
+document.getElementById('dm')?.remove();
+document.head.insertAdjacentHTML('beforeend','<style id=dm>{css}</style>');
+""")
 
     save_settings()
 
 def change_engine(token, name):
-    if not auth(token): 
+    if not auth(token):
         return
 
     if name in SEARCH_ENGINES:
@@ -130,14 +129,14 @@ def change_engine(token, name):
         window.load_url(SEARCH_ENGINES[name])
 
 def panic(token):
-    if not auth(token): 
+    if not auth(token):
         return
 
     window.destroy()
     os._exit(0)
 
 def show_logs(token):
-    if not auth(token): 
+    if not auth(token):
         return
 
     safe = "\\n".join(logs[-100:]).replace("`", "'")
@@ -162,30 +161,48 @@ def on_load():
         show_logs
     )
 
-    window.evaluate_js(f"""
-    const TOKEN = "{API_TOKEN}";
+    js = f"""
+const TOKEN = "{API_TOKEN}";
 
-    document.addEventListener('keydown', e=>{
-        if(e.ctrlKey && e.shiftKey && e.key==='X') panic(TOKEN);
-    });
+document.addEventListener('keydown', function(e) {{
+    if(e.ctrlKey && e.shiftKey && e.key === 'X') panic(TOKEN);
+}});
 
-    document.head.insertAdjacentHTML('beforeend',`
-    <style>
-    #ui{{position:fixed;top:10px;right:10px;z-index:9999;
-    display:flex;gap:6px;background:#000a;padding:8px;border-radius:10px}}
-    button,select{{border:none;border-radius:6px;padding:4px 8px}}
-    </style>
-    <div id=ui>
-      <select onchange="change_engine(TOKEN,this.value)">
-        <option>DuckDuckGo</option>
-        <option>Google</option>
-        <option>Startpage</option>
-      </select>
-      <button onclick="toggle_dark(TOKEN)">🌙</button>
-      <button onclick="show_logs(TOKEN)">📜</button>
-      <button onclick="panic(TOKEN)" style="background:red;color:white">PANIC</button>
-    </div>
-    `);
-    """)
+document.head.insertAdjacentHTML('beforeend', `
+<style>
+#ui{{
+position:fixed;
+top:10px;
+right:10px;
+z-index:9999;
+display:flex;
+gap:6px;
+background:#000a;
+padding:8px;
+border-radius:10px
+}}
+
+button,select{{
+border:none;
+border-radius:6px;
+padding:4px 8px
+}}
+</style>
+
+<div id="ui">
+  <select onchange="change_engine(TOKEN,this.value)">
+    <option>DuckDuckGo</option>
+    <option>Google</option>
+    <option>Startpage</option>
+  </select>
+
+  <button onclick="toggle_dark(TOKEN)">🌙</button>
+  <button onclick="show_logs(TOKEN)">📜</button>
+  <button onclick="panic(TOKEN)" style="background:red;color:white">PANIC</button>
+</div>
+`);
+"""
+
+    window.evaluate_js(js)
 
 webview.start(on_load)
