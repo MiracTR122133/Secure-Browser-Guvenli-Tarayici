@@ -1,5 +1,7 @@
 # ============================================================
 # Secure Browser (Clean Fixed Version)
+# Author: MiracTR
+# Disclaimer: This is a prototype of a project. Author is not responsable with errors and security problems. Look at codes first.
 # ============================================================
 
 import os, sys, json, datetime, subprocess, threading, secrets
